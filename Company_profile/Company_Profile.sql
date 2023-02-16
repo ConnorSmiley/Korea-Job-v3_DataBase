@@ -1,46 +1,65 @@
-drop table public.company_profile;
+drop table company_account;
 
-create table public.company_profile
+create table company_account
 (
-    id                  uuid                                not null references auth.users on delete cascade,
+    id                  uuid primary key                    not null references auth.users on delete cascade,
+    company_info_id     uuid                                not null,
     company_name        text                                not null,
     company_email       text                                not null,
     company_website     text                                not null,
-    created_at          TIMESTAMP DEFAULT current_timestamp not null,
-    updated_at          timestamp default current_timestamp not null,
+    company_image       uuid references company_image on delete cascade,
     company_description text[],
-    company_users       text[],
-    primary key (id)
+    company_users       uuid references company_users,
+    created_at          TIMESTAMP DEFAULT current_timestamp not null,
+    updated_at          timestamp default current_timestamp not null
 );
-alter table company_profile
+
+
+create table company_image
+(
+    id               uuid primary key                    not null,
+    company_image_id uuid                                not null,
+    company_name     text[]                              not null,
+    created_at       TIMESTAMP DEFAULT current_timestamp not null,
+    updated_at       timestamp default current_timestamp not null
+);
+
+create table company_users
+(
+    id               uuid primary key                    not null,
+    company_users_id uuid                                not null,
+    company          text                                not null,
+    company_username text                                not null,
+    company_role     uuid references company_role        not null,
+    created_at       TIMESTAMP DEFAULT current_timestamp not null,
+    updated_at       timestamp default current_timestamp not null
+);
+
+create table company_role
+(
+    id           uuid primary key                    not null,
+    company_role uuid                                not null,
+    role         text                                not null,
+    created_at   TIMESTAMP DEFAULT current_timestamp not null,
+    updated_at   timestamp default current_timestamp not null
+)
+
+
+alter table company_account
     enable row level security;
 create
-    policy "Public profiles are viewable by everyone." on company_profile
+    policy "Public profiles are viewable by everyone." on company_account
     for
     select using (true);
 create
-    policy "Users can insert their own profile." on company_profile
+    policy "Users can insert their own profile." on company_account
     for insert with check (auth.uid() = id);
 create
-    policy "Users can update own profile." on company_profile
+    policy "Users can update own profile." on company_account
     for
     update using (auth.uid() = id);
--- inserts a row into public.company_profile
--- create function public.handle_company_profile()
---     returns trigger
---     language plpgsql
---     security definer set search_path = public
--- as
--- $$
--- begin
---     insert into public.company_profile (id)
---     values (new.id);
---     return new;
--- end;
--- $$;
--- --trigger the function every time a user is created
--- create trigger on_auth_user_created_company_profile
---     after insert
---     on auth.users
---     for each row
--- execute procedure public.handle_company_profile();
+
+alter table company_account
+    add column company_job_posts uuid references job_board (post_id) not null;
+
+
