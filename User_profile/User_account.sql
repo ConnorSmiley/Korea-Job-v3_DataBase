@@ -4,14 +4,14 @@ select *
 from user_account;
 create table user_account
 (
-    id              uuid                                not null references auth.users,
+--     id              uuid                                not null references auth.users,
     user_account_id uuid      default gen_random_uuid() not null,
     full_name       text                                not null,
     email           text unique                         not null,
-    gender          smallint references gender (id),
+--     gender          smallint references gender (id),
     date_of_birth   date,
     website         text,
-    resume          uuid references user_resume (user_resume_id),
+--     resume          uuid references user_resume (user_resume_id),
     is_active       bool      default true,
     is_deleted      bool      default false,
     email_active    bool      default true,
